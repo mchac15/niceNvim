@@ -1,3 +1,4 @@
+-- catppuccin helper
 return {
 	"freddiehaddad/feline.nvim",
 	config = function()

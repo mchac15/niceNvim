@@ -1,24 +1,19 @@
 return {
-  "romgrk/barbar.nvim",
+  'romgrk/barbar.nvim',
   dependencies = {
-    "lewis6991/gitsigns.nvim",   -- OPTIONAL: for git status
-    "nvim-tree/nvim-web-devicons", -- OPTIONAL: for file icons
+    'lewis6991/gitsigns.nvim', -- OPTIONAL: for git status
+    'nvim-tree/nvim-web-devicons', -- OPTIONAL: for file icons
   },
-  init = function()
-    vim.g.barbar_auto_setup = false
+  config = function()
+    require('barbar').setup {} -- Ensure Barbar is initialized
+
     local map = vim.api.nvim_set_keymap
     local opts = { noremap = true, silent = true }
 
-    -- Move to previous/next
-    map("n", "gm", "<Cmd>BufferPrevious<CR>", opts)
-    map("n", "gt", "<Cmd>BufferNext<CR>", opts)
-    map('n', "<leader>gc", '<Cmd>BufferClose<CR>', opts)
+    -- Move to previous/next buffer
+    map('n', '<leader>bn', '<Cmd>BufferPrevious<CR>', opts) -- Use <leader>bn instead of gm
+    map('n', '<leader>bp', '<Cmd>BufferNext<CR>', opts) -- Use <leader>bp instead of gt
+    map('n', '<leader>bc', '<Cmd>BufferClose<CR>', opts) -- Close buffer
   end,
-  opts = {
-    -- lazy.nvim will automatically call setup for you. put your options here, anything missing will use the default:
-    -- animation = true,
-    -- insert_at_start = true,
-    -- …etc.
-  },
-  version = "^1.0.0", -- optional: only update when a new 1.x version is released
+  version = '^1.0.0', -- only update when a new 1.x version is released
 }

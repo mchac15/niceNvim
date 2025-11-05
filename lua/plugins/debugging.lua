@@ -1,24 +1,33 @@
+-- Main debugger
 return {
-  "mfussenegger/nvim-dap",
+  'mfussenegger/nvim-dap',
   dependencies = {
     {
-      "rcarriga/nvim-dap-ui",
+      'rcarriga/nvim-dap-ui',
       lazy = false,
     },
-    "nvim-neotest/nvim-nio",
+    'nvim-neotest/nvim-nio',
     {
-      "mfussenegger/nvim-dap-python",
+      'mfussenegger/nvim-dap-python',
       config = function()
-        require("dap-python").setup("/home/matheo/.virtualenvs/neovim/bin/python")
+        require('dap-python').setup '/home/matheo/.virtualenvs/neovim/bin/python'
+      end,
+    },
+    {
+      'leoluz/nvim-dap-go',
+      ft = { 'go' },
+      config = function()
+        require('dap-go').setup()
       end,
     },
   },
   config = function()
-    local dap = require("dap")
-    local dapui = require("dapui")
+    local dap = require 'dap'
+    local dapui = require 'dapui'
 
-    dapui.setup({})
+    dapui.setup {}
 
+    -- DAP UI auto open/close
     dap.listeners.before.attach.dapui_config = function()
       dapui.open()
     end
@@ -31,67 +40,86 @@ return {
     dap.listeners.before.event_exited.dapui_config = function()
       dapui.close()
     end
-    vim.keymap.set("n", "<F5>", dap.continue, {})
-    vim.keymap.set("n", "<F10>", dap.step_over, {})
-    vim.keymap.set("n", "<F11>", dap.step_into, {})
-    vim.keymap.set("n", "<F12>", dap.step_out, {})
-    vim.keymap.set("n", "<Leader>b", dap.toggle_breakpoint, {})
-    --vim.keymap.set("n", "<Leader>B", dap.set_breakpoint(), {})
-    --vim.keymap.set("n", "<Leader>lp", dap.set_breakpoint(nil, nil, vim.fn.input("Log point message: ")), {})
-    --vim.keymap.set("n", "<Leader>dr", dap.repl.open(), {})
-    --vim.keymap.set("n", "<Leader>dl", dap.run_last(), {})
-    --vim.keymap.set({ "n", "v" }, "<Leader>dh", require("dap.ui.widgets").hover(), {})
-    --vim.keymap.set({ "n", "v" }, "<Leader>dp", require("dap.ui.widgets").preview(), {})
-    --vim.keymap.set("n", "<Leader>df", function()
-    --	local widgets = require("dap.ui.widgets")
-    --	widgets.centered_float(widgets.frames)
-    --end)
-    --vim.keymap.set("n", "<Leader>ds", function()
-    --	local widgets = require("dap.ui.widgets")
-    --	widgets.centered_float(widgets.scopes)
-    --end)
+
+    -- Function key mappings
+    vim.keymap.set('n', '<F5>', dap.continue, {})
+    vim.keymap.set('n', '<F10>', dap.step_over, {})
+    vim.keymap.set('n', '<F11>', dap.step_into, {})
+    vim.keymap.set('n', '<F12>', dap.step_out, {})
+
+    -- DAP keymaps using your preferred scheme
+    vim.keymap.set('n', '<leader>db', dap.toggle_breakpoint, { desc = 'Add breakpoint at line' })
+    vim.keymap.set('n', '<leader>dus', function()
+      local widgets = require 'dap.ui.widgets'
+      local sidebar = widgets.sidebar(widgets.scopes)
+      sidebar.open()
+    end, { desc = 'Open debugging sidebar' })
+
+    -- Additional useful DAP keymaps
+    vim.keymap.set('n', '<Leader>dB', function()
+      dap.set_breakpoint(vim.fn.input 'Breakpoint condition: ')
+    end, { desc = 'Set conditional breakpoint' })
+    vim.keymap.set('n', '<Leader>dlp', function()
+      dap.set_breakpoint(nil, nil, vim.fn.input 'Log point message: ')
+    end, { desc = 'Set log point' })
+    vim.keymap.set('n', '<Leader>dr', dap.repl.open, { desc = 'Open DAP REPL' })
+    vim.keymap.set('n', '<Leader>dl', dap.run_last, { desc = 'Run last debug session' })
+    vim.keymap.set({ 'n', 'v' }, '<Leader>dh', function()
+      require('dap.ui.widgets').hover()
+    end, { desc = 'DAP hover' })
+    vim.keymap.set({ 'n', 'v' }, '<Leader>dp', function()
+      require('dap.ui.widgets').preview()
+    end, { desc = 'DAP preview' })
+    vim.keymap.set('n', '<Leader>df', function()
+      local widgets = require 'dap.ui.widgets'
+      widgets.centered_float(widgets.frames)
+    end, { desc = 'Show frames' })
+
+    -- C/C++ adapter configuration
     dap.adapters.cppdbg = {
-      id = "cppdbg",
-      type = "executable",
-      command = "/home/matheo/cpptools-linux/extension/debugAdapters/bin/OpenDebugAD7",
+      id = 'cppdbg',
+      type = 'executable',
+      command = '/home/matheo/cpptools-linux/extension/debugAdapters/bin/OpenDebugAD7',
     }
+
+    -- C/C++ configurations
     dap.configurations.cpp = {
       {
-        name = "Launch file",
-        type = "cppdbg",
-        request = "launch",
+        name = 'Launch file',
+        type = 'cppdbg',
+        request = 'launch',
         program = function()
-          return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+          return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
         end,
-        cwd = "${workspaceFolder}",
+        cwd = '${workspaceFolder}',
         stopAtEntry = true,
       },
       {
-        name = "Launch file with argument",
-        type = "cppdbg",
-        request = "launch",
+        name = 'Launch file with argument',
+        type = 'cppdbg',
+        request = 'launch',
         program = function()
-          return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+          return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
         end,
         args = function()
-          local args_str = vim.fn.input({
-            prompt = "Arguments: ",
-          })
-          return vim.split(args_str, " +")
+          local args_str = vim.fn.input {
+            prompt = 'Arguments: ',
+          }
+          return vim.split(args_str, ' +')
         end,
-        cwd = "${workspaceFolder}",
+        cwd = '${workspaceFolder}',
         stopAtEntry = true,
       },
       {
-        name = "Attach to gdbserver :1234",
-        type = "cppdbg",
-        request = "launch",
-        MIMode = "gdb",
-        miDebuggerServerAddress = "localhost:1234",
-        miDebuggerPath = "/usr/bin/gdb",
-        cwd = "${workspaceFolder}",
+        name = 'Attach to gdbserver :1234',
+        type = 'cppdbg',
+        request = 'launch',
+        MIMode = 'gdb',
+        miDebuggerServerAddress = 'localhost:1234',
+        miDebuggerPath = '/usr/bin/gdb',
+        cwd = '${workspaceFolder}',
         program = function()
-          return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+          return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
         end,
       },
     }

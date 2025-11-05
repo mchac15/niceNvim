@@ -1,20 +1,37 @@
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+require 'core.options' -- Load general options
+require 'core.keymaps' -- Load general keymaps
+require 'core.snippets' -- Custom code snippets
+
+-- Set up the Lazy plugin manager
+local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
-    vim.fn.system({
-        "git",
-        "clone",
-        "--filter=blob:none",
-        "https://github.com/folke/lazy.nvim.git",
-        "--branch=stable", -- latest stable release
-        lazypath,
-    })
+  local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
+  local out = vim.fn.system { 'git', 'clone', '--filter=blob:none', '--branch=stable', lazyrepo, lazypath }
+  if vim.v.shell_error ~= 0 then
+    error('Error cloning lazy.nvim:\n' .. out)
+  end
 end
 vim.opt.rtp:prepend(lazypath)
 
-require("vim-options")
-require("lazy").setup("plugins")
-
--- Setting clipboard to use the system clipboard
-vim.opt.clipboard = "unnamedplus"
-vim.o.background = "dark" -- or "light" for light mode
-vim.cmd("colorscheme kanagawa-wave")
+-- Set up plugins
+require('lazy').setup {
+  require 'plugins.dadbod',
+  require 'plugins.sqlua',
+  require 'plugins.neotree',
+  require 'plugins.colortheme',
+  require 'plugins.bufferline',
+  require 'plugins.lualine',
+  require 'plugins.treesitter',
+  require 'plugins.telescope',
+  require 'plugins.lsp',
+  require 'plugins.autocompletion',
+  require 'plugins.none-ls',
+  require 'plugins.gitsigns',
+  require 'plugins.alpha',
+  require 'plugins.indent-blankline',
+  require 'plugins.misc',
+  require 'plugins.comment',
+  require 'plugins.claude-code',
+  require 'plugins.nvim-dap-go',
+  require 'plugins.scala',
+}
